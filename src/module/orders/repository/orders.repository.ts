@@ -8,53 +8,68 @@ import { OrderProduct } from "../entity/order-product";
 // import { Model, Transaction } from "sequelize";
 import { Model,Op, Transaction } from 'sequelize';
 import { Product } from "src/module/products/entity/product.entity";
+import { User } from "src/module/users/entity/user.entity";
+import { ProductService } from "src/module/products/service/product.service";
+// import { User } from "src/model/userModel";
 @Injectable()
 export class OrderRepository {
-
-    async getAllOrders(options: PaginationDto) {
-            const order = await Order.findAll({
-                attributes: { exclude: ['createdAt', 'updatedAt'] },
-                limit: options.limit || 10,
-                offset: options.offset || 0,
-            });
-            return order;
-    }
-
-    // async createOrderWithProduct( createOrderDto: CreateOrderDto,
-    //     addProductDto: AddProductDto[],dbTransaction:Transaction){
-    //         try {
-    //             const order = await Order.create(createOrderDto,{dbtransaction})
-    //             const products = addProductDto.map((addProductDto) => ({
-    //                 ...addProductDto,
-    //                 orderId: order.id,
-    //             }));
-    //             await Product.bulkCreate(products, { dbTransaction });
-    //             await dbTransaction.commit();
-    //             return order;
-    //         } catch (error) {
-                
-    //         }
-
+    constructor(private productService: ProductService){}
+    // async getAllOrders(options: PaginationDto) {
+    //         const order = await Order.findAll({
+    //             attributes: { exclude: ['createdAt', 'updatedAt'] },
+    //             limit: options.limit || 10,
+    //             offset: options.offset || 0,
+    //         });
+    //         return order;
     // }
+
+    async createOrderWithProduct( createOrderDto:  Partial<Order>,
+        orderproduct: Partial<OrderProduct[]>,dbTransaction:Transaction){
+            try {
+                const order = await Order.create(createOrderDto,{dbtransaction:Transaction,include:[OrderProduct]})
+                for (const data of orderproduct) {
+                    const product = await this.productService.getAllProductsById(Number(data.productId));
+                    if(!product) {
+                      throw new HttpException(`Product with id ${data.id} not found`,HttpStatus.NOT_FOUND);
+                    }
+
+                    else {
+                        await OrderProduct.create({ ...createOrderDto, id: createOrderDto.id }, { dbtransaction:Transaction });
+
+                    }
+                  }
+                await dbTransaction.commit();
+                return order;
+            } catch (error) {
+                await dbTransaction.rollback();
+                throw new HttpException(error.message,HttpStatus.BAD_REQUEST);
+            }
+
+    }
 
 
     async getAllOrdersByUserId(options:PaginatedOrdersResultDto) {
-        return await Order.findAndCountAll({
-            where: options.userid ? { id: options.userid } : {},
+        return await OrderProduct.findAndCountAll({
+            where:{id:options.userid},
             include: [
                 {
-                    model: OrderProduct,
+                    model: User,
+                    as: 'users',
+                    attributes: { exclude: ['createdAt'] },
+                },
+                {
+                    model: Product,
                     as: 'products',
-                    attributes: { exclude: ['createdAt', 'updatedAt'] }
+                    attributes: { exclude: ['createdAt'] },
                 },
             ],
-            attributes: { exclude: ['createdAt', 'updatedAt'] },
+            
         });
     }
 
     //get order by id 
-    async getOrderByid(id: string): Promise<Order> {
-            const order = await Order.findByPk(id, {
+    async getOrderById(id: number){
+            const order = await OrderProduct.findByPk(id, {
             attributes: { exclude: ['createdAt'] },
             });
             if (!order) {
@@ -64,30 +79,42 @@ export class OrderRepository {
     }
 
     //creation order
-    async createOrder(params: CreateOrderDto, dbTransaction: Transaction): Promise<Order> {
-        try {
-          const newOrder = await Order.create({...params,},{ transaction: dbTransaction });
-          await dbTransaction.commit();
-          return newOrder;
-        } catch (error) {
-          await dbTransaction.rollback();
-          console.error('Error creating order:', error);
-          throw error;
-        }
-      }
+    //TODO
+    // async createOrder(params: CreateOrderDto, dbTransaction: Transaction) {
+    //     const createOrder=await Order.create()
+    //     try {
+    //         if(createOrder){
+
+    //       const newOrder = await Order.create({...params,},{ transaction: dbTransaction });
+    //       await dbTransaction.commit();
+    //       return newOrder;
+    //     } catch (error) {
+    //       await dbTransaction.rollback();
+    //       console.error('Error creating order:');
+    //       throw error;
+    //     }
+    //   }
 
     //delete order by Id
-    async deleteOrderById(options:FilteringDto, dbTransaction: Transaction): Promise<void> {
+    async deleteOrderById(id:number, dbTransaction: Transaction) {
         try {
-            const order = await Order.findByPk(options.id);
+            await dbTransaction.rollback();
+            await dbTransaction.commit();
+            const order = await Order.findByPk(id,{transaction:dbTransaction});
             if (!order) {
                 throw new HttpException('order not found', HttpStatus.NOT_FOUND);   
             }
-            await order.destroy({transaction: dbTransaction});
+            await OrderProduct.destroy({
+                where :{orderId: id}, transaction: dbTransaction,
+            });
+            await Order.destroy({
+                where :{id:id},
+                transaction: dbTransaction,
+            });
             await dbTransaction.commit();
         } catch (error) {
             await dbTransaction.rollback();
-            console.error('Error deleting order:', error); 
+            console.error('Error deleting order:'); 
             throw error;
         }
     }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query, ParseIntPipe } from '@nestjs/common';
 import { OrdersService } from '../service/orders.service';
 import { CreateOrderDto, PaginatedOrdersResultDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
@@ -19,30 +19,23 @@ export class OrdersController {
     return this.ordersService.createOrder(createOrderDto,dbTransaction);
   }
 
-  //get allOrders
+  //get all order by userid
   @Get()
   @ResponseCustom(masterResponseName.GET_ALL_ORDERS)
-  findAllOrders(@Query() query: PaginationDto) {
-    return this.ordersService.findAllOrders(query);
-  }
-
-  //get order by userid
-  @Get()
-  @ResponseCustom(masterResponseName.GET_ALL_ORDERS)
-  async findAllOrdersbyUser(@Query() query: PaginatedOrdersResultDto) {
+  async findAllOrdersByUser(@Query() query: PaginatedOrdersResultDto) {
     return await this.ordersService.getAllOrdersByUser(query);
   }
 
   //get order by orderid
   @Get(':id')
   @ResponseCustom(masterResponseName.GET_ALL_ORDERS)
-  findOneOrder(@Param('id') id: string) {
+  asfindOneOrder(@Param('id',ParseIntPipe) id: number) {
     return this.ordersService.findOneOrder(id);
   }
 
   //delete order
   @Delete(':id')
-  async removeOrder(@Param('id') id: FilteringDto,dbTransaction:Transaction) {
+  async removeOrder(@Param('id',ParseIntPipe) id:number, dbTransaction:Transaction) {
     return await this.ordersService.deleteOrder(id,dbTransaction);
   }
 }

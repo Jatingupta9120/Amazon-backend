@@ -41,27 +41,13 @@ export class UserRepository {
     // }
 
     async createUser(params: CreateUserDTO,dbTransaction: Transaction): Promise<User> {
-        try {
             const hashedPassword = await bcrypt.hash(params.password, 10);
             const newUser = await User.create({...params,password: hashedPassword},{ transaction: dbTransaction });
-            await dbTransaction.commit();
             return newUser;
-        } catch (error) {
-            console.log("error occur during user creation");
-            await dbTransaction.rollback();
-            throw new error;
-        }
     }
 
-    async deleteUser(id: string,dbTransaction: Transaction) {
-        try {
-            const user = await User.destroy({ where: { id }, transaction: dbTransaction });
-            await dbTransaction.commit();
+    async deleteUser(id: number,dbTransaction: Transaction) {
+            const user = await User.destroy({ where: { id:id }, transaction: dbTransaction });
             return `user sucessfully deleted ${user}`;
-        } catch (error) {
-            await dbTransaction.rollback();
-            throw new error;
-        }
-        
     }
 }

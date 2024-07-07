@@ -45,7 +45,7 @@ export class UserService {
     }
 
     //delete user
-    async deleteUser(id: string,dbTransaction:Transaction) {
+    async deleteUser(id: number,dbTransaction:Transaction) {
         try {
             const user = await this.userRepository.deleteUser(id,dbTransaction);
             await dbTransaction.commit();

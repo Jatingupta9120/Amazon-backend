@@ -1,5 +1,6 @@
 import { Transform } from "class-transformer";
 import { IsNumber, IsOptional } from "class-validator";
+import { Order } from "../entity/order.entity";
 
 export class PaginationDto {
     @IsNumber()
@@ -11,6 +12,8 @@ export class PaginationDto {
     @IsOptional()
     @Transform(({ value }) => parseInt(value))
     offset?: number = 0;
+
+    
 
     
 }

@@ -5,7 +5,7 @@ export class UpdateProductDto {
     @IsOptional()
     @IsString()
     // @Transform(({ value }) => parseInt(value))
-    id?: string;
+    id?: number;
 
 
     @IsString()

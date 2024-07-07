@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Post,
     Query,
 } from '@nestjs/common';
@@ -40,7 +41,7 @@ export class UserController {
 
     //delete user get by id
     @Delete('/:id')
-    async remove(@Param('id') id: string,dbTransaction:Transaction) {
+    async remove(@Param('id',ParseIntPipe) id: number,dbTransaction:Transaction) {
         return await this.userService.deleteUser(id,dbTransaction);
     }
 }

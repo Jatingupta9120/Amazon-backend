@@ -32,7 +32,7 @@ export class CreateOrderDto {
 
     @IsString()
     @IsOptional()
-    products?: OrderProduct[];
+    products?: Product[];
 
     @IsString()
     @IsOptional()
@@ -60,10 +60,12 @@ export class PaginatedOrdersResultDto {
   @IsOptional()
   userid?: number;
 
-  data?: Order[];
+  @IsOptional()
+  orders?: Order[];  
 
   @IsNumber()
   @IsOptional()
+  @Transform(({ value }) => parseInt(value))
   offset?: number=0;
 
   @IsNumber()
@@ -73,6 +75,11 @@ export class PaginatedOrdersResultDto {
 
   @IsNumber()
   @IsOptional()
-  totalCount?: number;
+  total?: number;
+
+  @IsString()
+  @IsOptional()
+  sortBy?: string;
+
 }
 

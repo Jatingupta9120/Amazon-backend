@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Param } from "@nestjs/common";
 import { PaginationDto } from "../dto/pagination.dto";
 import { CreateProductDto } from "../dto/product.dto";
 import { UpdateProductDto } from "../dto/update.dto";
@@ -8,6 +8,7 @@ import { MASTER_ERROR } from "src/constants/error";
 import { Transaction } from "sequelize";
 import { log } from "winston";
 import { OrderProduct } from "src/module/orders/entity/order-product";
+import { User } from "src/module/users/entity/user.entity";
 
 @Injectable()
 export class ProductRepository {
@@ -15,11 +16,10 @@ export class ProductRepository {
 
     async getAllProductsbyuserId(options: PaginationDto) {
             return await Product.findAndCountAll({
-                where: options.userid ? { id: options.userid } : {},
                 include: [
                     {
-                        model: OrderProduct,
-                        as: 'orders',
+                        model: User,
+                        as: 'users',
                         attributes: { exclude: ['createdAt', 'updatedAt'] }
                     },
                 ],
@@ -30,8 +30,9 @@ export class ProductRepository {
 
 
 
-    async getAllProductsById(options: PaginationDto): Promise<Product> {
-            const products = await Product.findByPk(options.id, {
+    async getProductsById(id: number): Promise<Product> {
+            const products = await Product.findByPk(id, {
+            include:[{model:User}],
             attributes: { exclude: ['createdAt', 'updatedAt'] },
             });
             if (!products) {
@@ -42,9 +43,13 @@ export class ProductRepository {
 
 
 
-    async createProduct(params: CreateProductDto,dbTransaction: Transaction): Promise<Product> {
+    async createProduct(params: CreateProductDto,dbTransaction: Transaction) {
         try {
-        const newProduct = await Product.create({...params},{ transaction: dbTransaction });
+        const product=await Product.findByPk(params.id);
+        if(product){
+            throw new HttpException('product already exists',HttpStatus.CONFLICT);
+        }
+        const newProduct = await Product.create(params,{transaction:dbTransaction});
         await dbTransaction.commit();
         return newProduct;
         } catch (error) {
@@ -56,19 +61,34 @@ export class ProductRepository {
 
 
 
-    async updateProduct(options:PaginationDto,product:UpdateProductDto,dbTransaction: Transaction){
+    async updateProduct(productDto:UpdateProductDto,dbTransaction: Transaction){
         try {
-            const updatedProduct= await Product.update(product,{where:{id:options.userid},transaction: dbTransaction});
+            const { id, ...updatedValues } = productDto;
+    
+            const product = await Product.findByPk(id, { transaction: dbTransaction });
+            if (!product) {
+                throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+            }
+            const [numRowsUpdated, updatedProducts] = await Product.update(updatedValues, {
+                where: { id: id }, 
+                returning: true,
+                transaction: dbTransaction,
+            });
+            if (numRowsUpdated === 0) {
+                throw new Error('Failed to update product');
+            }
             await dbTransaction.commit();
-            return `product sucessfully deleted ${updatedProduct}`;
+    
+            return `Product successfully updated: ${updatedProducts}`;
         } catch (error) {
             await dbTransaction.rollback();
-            throw new error;
+            console.error('Error updating product:', error);
+            throw error;
         }
     }
 
 
-    async deleteProduct(id:string,dbTransaction: Transaction) {
+    async deleteProduct(id:number,dbTransaction: Transaction) {
             try {
             const product = await Product.destroy({where: { id },transaction: dbTransaction});
             // await product.destroy();

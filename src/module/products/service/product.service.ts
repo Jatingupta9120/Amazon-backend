@@ -4,11 +4,12 @@ import { CreateProductDto } from "../dto/product.dto";
 import { UpdateProductDto } from "../dto/update.dto";
 import { ProductRepository } from "../repository/product.repository";
 import { Transaction } from "sequelize";
+import { Product } from "../entity/product.entity";
 @Injectable()
 export class ProductService {
     constructor(private readonly productRepository: ProductRepository) {}
 
-    //getAllproducts
+    //getAllproducts by userid
     async getAllProductsByUserId(options: PaginationDto) {
         const product = await this.productRepository.getAllProductsbyuserId(options);
         if (!product) {
@@ -19,9 +20,9 @@ export class ProductService {
     }
 
 
-    //get all user by id
-    async getAllProductsById(options: PaginationDto){
-        const product = await this.productRepository.getAllProductsById(options);
+    //get all products by productid
+    async getAllProductsById(id: number){
+        const product = await this.productRepository.getProductsById(id);
         if (!product) {
             throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
             // throw new HttpExceptionWrapper(USER_ERROR.USER_NOT_EXIST);
@@ -31,9 +32,9 @@ export class ProductService {
 
 
     //Create new User
-    async createProduct(options: CreateProductDto,dbTransaction:Transaction) {
+    async createProduct(productInformation: CreateProductDto,dbTransaction:Transaction):Promise<Product> {
         try {
-            const newProduct = await this.productRepository.createProduct(options,dbTransaction);
+            const newProduct = await this.productRepository.createProduct(productInformation,dbTransaction);
             await dbTransaction.commit();
             return newProduct; 
         } catch (error) {
@@ -46,9 +47,9 @@ export class ProductService {
 
 
     //delete user
-    async deleteProduct(options: PaginationDto,dbTransaction:Transaction) {
+    async deleteProduct(id: number,dbTransaction:Transaction) {
         try {
-        const deleteProduct = await this.productRepository.deleteProduct(options.id,dbTransaction);
+        const deleteProduct = await this.productRepository.deleteProduct(id,dbTransaction);
         await dbTransaction.commit();
         return deleteProduct;
         } catch (error) {
@@ -60,9 +61,9 @@ export class ProductService {
 
 
     //update product 
-    async updateProduct(options:PaginationDto,product:UpdateProductDto,dbTransaction:Transaction){
+    async updateProduct(product:UpdateProductDto,dbTransaction:Transaction){
         try {
-        const replaceProduct=await this.productRepository.updateProduct(options, product,dbTransaction);
+        const replaceProduct=await this.productRepository.updateProduct(product,dbTransaction);
         await dbTransaction.commit();
         return replaceProduct;
         } catch (error) {

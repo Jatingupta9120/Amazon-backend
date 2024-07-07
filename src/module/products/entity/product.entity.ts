@@ -14,12 +14,12 @@ export class Product extends Model<Product> {
   // orderid: string;
 
   @Column({
-    type: DataType.UUID,
+    type: DataType.NUMBER,
     primaryKey:true,
     allowNull:false,
-    defaultValue: DataType.UUIDV4,
+    defaultValue: DataType.NUMBER,
   })
-  id:string;
+  id:number;
 
   @Column({
     type: DataType.STRING,

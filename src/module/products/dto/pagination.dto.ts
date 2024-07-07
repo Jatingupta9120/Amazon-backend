@@ -3,9 +3,9 @@ import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class PaginationDto {
     @IsOptional()
-    @IsString()
-    id?:string;
-    
+    @IsNumber()
+    id?:number;
+
     @IsOptional()
     @IsString()
     userid?:string;
@@ -20,3 +20,4 @@ export class PaginationDto {
     @Transform(({ value }) => parseInt(value))
     offset?: number = 0;
 }
+
