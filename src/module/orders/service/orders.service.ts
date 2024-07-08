@@ -9,10 +9,14 @@ import { HttpExceptionWrapper } from 'src/utils/error/error.http.wrapper';
 import { MASTER_ERROR } from 'src/constants/error';
 import { Order } from '../entity/order.entity';
 import { OrderProduct } from '../entity/order-product';
+import { UserService } from 'src/module/users/service/user.service';
+import { CreateOrderItemDto } from '../dto/create-order-item.dto';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly orderRepository: OrderRepository) {}
+  constructor(private readonly orderRepository: OrderRepository,
+    private readonly userService: UserService) 
+   {}
 //   async createOrderNM(
 //     createOrder: CreateOrderDto,
 //     addProduct: AddProductDto[],
@@ -28,15 +32,16 @@ export class OrdersService {
 //     }
 // }
   //create order
-  async createOrder(options:FilteringDto,createOrderDto: CreateOrderDto,dbTransaction:Transaction): Promise<Order>  {
+  async createOrder(createorder:CreateOrderDto,dbTransaction:Transaction): Promise<Order>  {
     try {
-      const order=await Order.findByPk(options.id);
-      if(order){
-        throw new HttpException('order already exists',HttpStatus.CONFLICT);
-      }
-      const newOrder = await this.orderRepository.createOrder({
-        userId:createOrderDto.userId,price:createOrderDto.totalPrice,address:createOrderDto.address,orderStatus:createOrderDto.status,dbTransaction
-      },createOrderDto.);
+      const orderProducts: OrderProduct[] = createorder.orderItems.map((item: CreateOrderItemDto) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+      const newOrder = await this.orderRepository.createOrderWithProduct({
+        userid:createorder.userId,Price:createorder.price,address:createorder.address,
+      },orderProducts,dbTransaction);
       await dbTransaction.commit();
       return newOrder;
     } catch (error) {
@@ -47,8 +52,8 @@ export class OrdersService {
   }
 
   // list all orders by particular user
-  async getAllOrdersByUser(paginationDto: PaginatedOrdersResultDto) {
-    const order=await this.orderRepository.getAllOrdersByUserId(paginationDto);
+  async getAllOrdersByUser(options:FilteringDto) {
+    const order=await this.orderRepository.getAllOrdersByUserId(options);
     return order;
   }
 

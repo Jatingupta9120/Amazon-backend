@@ -16,7 +16,7 @@ export class ProductController {
     //GET ALL PRODUCTS
     @Get()
     @ResponseCustom(masterResponseName.GET_ALL_PRODUCTS)
-    async getAllProducts(@Query() query: PaginationDto): Promise<{ rows: Product[]; count: number }> {
+    async getAllProducts(@Query() query: PaginationDto): Promise<Product[]> {
       return this.productService.getAllProductsByUserId(query);
     }
 

@@ -8,19 +8,19 @@ import { Transaction } from 'sequelize';
 @Injectable()
 export class UserService {
     constructor(private readonly userRepository: UserRepository) {}
-    //getAllUser
-    // async getAllUser(options: UserParamsDTO) {
-    //     const users = await this.userRepository.getAllUsers(options);
-    //     if (!users) {
-    //         throw new HttpExceptionWrapper(MASTER_ERROR.USERS_NOT_EXISTS);
-    //     }
-    //     return users;
-    // }
-    //get all user by id
-    // async getAllUsersById(options: UserParamsDTO) {
-    //     const user = await this.userRepository.getUserById(options.id);
-    //     return user;
-    // }
+    // getAllUser
+    async getAllUser(options: UserParamsDTO) {
+        const users = await this.userRepository.getAllUsers(options);
+        if (!users) {
+            throw new HttpExceptionWrapper(MASTER_ERROR.USERS_NOT_EXISTS);
+        }
+        return users;
+    }
+    // get all user by id
+    async getAllUsersById(options: UserParamsDTO) {
+        const user = await this.userRepository.getUserById(options.id);
+        return user;
+    }
     //get all user by email
     // async findOneByEmail(options: CreateUserDTO) {
     //     const user = await this.userRepository.getUserByEmail(options);
@@ -31,28 +31,19 @@ export class UserService {
     // }
 
     //Create new User
-    async createUser(create: CreateUserDTO,dbTransaction:Transaction) {
-        try {
-            const createdUser = await this.userRepository.createUser(create,dbTransaction);
-            await dbTransaction.commit();
+    async createUser(create: CreateUserDTO) {
+            const createdUser = await this.userRepository.createUser(create);
             return createdUser.toJSON();
-        } catch (error) {
-            console.log("error while creating User");
-            await dbTransaction.rollback();
-            throw new error;
-            
-        }
+        
     }
 
     //delete user
-    async deleteUser(id: number,dbTransaction:Transaction) {
+    async deleteUser(id: string) {
         try {
-            const user = await this.userRepository.deleteUser(id,dbTransaction);
-            await dbTransaction.commit();
+            const user = await this.userRepository.deleteUser(id);
             return user;
         } catch (error) {
             console.log("error while deleting User");
-            await dbTransaction.rollback();
             throw new error;
         }
     }

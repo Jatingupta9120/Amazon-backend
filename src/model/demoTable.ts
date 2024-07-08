@@ -14,7 +14,7 @@ export class District extends Model<District> {
     emai: string;
 
     @Column({
-        type: DataType.NUMBER,
+        type: DataType.INTEGER,
         allowNull: false,
     })
     age: number;

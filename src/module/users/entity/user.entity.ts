@@ -1,15 +1,16 @@
 import { Column, DataType, ForeignKey, HasMany, Model } from 'sequelize-typescript';
 // import { OrderProduct } from 'src/module/orders/entity/order-product';
 import { Order } from 'src/module/orders/entity/order.entity';
+import { Product } from 'src/module/products/entity/product.entity';
 import { CustomTable } from 'src/utils/custom-class-validator/validator/customTable';
 @CustomTable('users')
 export class User extends Model<User> {
     @Column({
         primaryKey: true,
-        type: DataType.UUID,
-        defaultValue: DataType.UUIDV4,
+        type: DataType.INTEGER,
+        defaultValue: DataType.INTEGER,
     })
-    id: string;
+    id: number;
 
     @Column({
         allowNull: false,
@@ -46,6 +47,9 @@ export class User extends Model<User> {
 
     @HasMany(() => Order)
     order: Order[];
+
+    @HasMany(() => Product)
+    product: Product[];
 
 
 

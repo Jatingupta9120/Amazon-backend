@@ -10,7 +10,7 @@ export class ProductService {
     constructor(private readonly productRepository: ProductRepository) {}
 
     //getAllproducts by userid
-    async getAllProductsByUserId(options: PaginationDto) {
+    async getAllProductsByUserId(options: PaginationDto): Promise<Product[]> {
         const product = await this.productRepository.getAllProductsbyuserId(options);
         if (!product) {
             // throw new HttpExceptionWrapper(USER_ERROR.USER_NOT_EXIST);

@@ -9,23 +9,16 @@ import { Transaction } from "sequelize";
 import { log } from "winston";
 import { OrderProduct } from "src/module/orders/entity/order-product";
 import { User } from "src/module/users/entity/user.entity";
+import { identity } from "rxjs";
 
 @Injectable()
 export class ProductRepository {
 
 
-    async getAllProductsbyuserId(options: PaginationDto) {
-            return await Product.findAndCountAll({
-                include: [
-                    {
-                        model: User,
-                        as: 'users',
-                        attributes: { exclude: ['createdAt', 'updatedAt'] }
-                    },
-                ],
-                attributes: { exclude: ['createdAt', 'updatedAt'] },
-        
-            });
+    async getAllProductsbyuserId(options: PaginationDto): Promise<Product[]>{
+            return await Product.findAll({
+                where: {id:options.id}
+        });
     }
 
 

@@ -12,7 +12,7 @@ import { Order } from '../entity/order.entity';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  //create order
+  // create order
   @Post()
   @ResponseCustom(masterResponseName.ORDER_CREATED)
   async createOrder(@Body() createOrderDto: CreateOrderDto,dbTransaction:Transaction) {
@@ -22,14 +22,14 @@ export class OrdersController {
   //get all order by userid
   @Get()
   @ResponseCustom(masterResponseName.GET_ALL_ORDERS)
-  async findAllOrdersByUser(@Query() query: PaginatedOrdersResultDto) {
+  async findAllOrdersByUser(@Query() query: FilteringDto) {
     return await this.ordersService.getAllOrdersByUser(query);
   }
 
   //get order by orderid
   @Get(':id')
   @ResponseCustom(masterResponseName.GET_ALL_ORDERS)
-  asfindOneOrder(@Param('id',ParseIntPipe) id: number) {
+  findOneOrder(@Param('id',ParseIntPipe) id: number) {
     return this.ordersService.findOneOrder(id);
   }
 

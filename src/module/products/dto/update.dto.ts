@@ -3,7 +3,7 @@ import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UpdateProductDto {
     @IsOptional()
-    @IsString()
+    @IsNumber()
     // @Transform(({ value }) => parseInt(value))
     id?: number;
 

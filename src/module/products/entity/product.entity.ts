@@ -1,23 +1,23 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, AutoIncrement } from 'sequelize-typescript';
+import { OrderProduct } from 'src/module/orders/entity/order-product';
 import { Order } from 'src/module/orders/entity/order.entity';
 import { User } from 'src/module/users/entity/user.entity';
 import { CustomTable } from 'src/utils/custom-class-validator/validator/customTable';
 
 @CustomTable('products')
 export class Product extends Model<Product> {
-  // @ForeignKey(() => Order)
-  // @Column({
-  //   type: DataType.UUID,
-  //   allowNull: false,
-  //   defaultValue: DataType.UUIDV4,
-  // })
-  // orderid: string;
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  userid: number;
 
   @Column({
-    type: DataType.NUMBER,
+    type: DataType.INTEGER,
     primaryKey:true,
+    autoIncrement:true,
     allowNull:false,
-    defaultValue: DataType.NUMBER,
   })
   id:number;
 
@@ -64,7 +64,4 @@ export class Product extends Model<Product> {
       defaultValue: DataType.NOW,
   })
   updated_at: Date;
-
-  // @BelongsTo(() => Order)
-  // orders: Order[];
 }

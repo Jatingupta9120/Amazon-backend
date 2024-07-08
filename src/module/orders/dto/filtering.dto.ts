@@ -1,3 +1,4 @@
+import { Transform } from "class-transformer";
 import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class FilteringDto {
@@ -5,15 +6,21 @@ export class FilteringDto {
     @IsOptional()
     id?: number;
 
-    @IsString()
+    @IsNumber()
     @IsOptional()
-    orderCode?: string;
-
-    @IsString()
-    @IsOptional()
-    orderType?: string;
+    userid?: number;
 
     @IsString()
     @IsOptional()
     orderStatus?: string;
+
+    @IsNumber()
+    @IsOptional()
+    @Transform(({ value }) => parseInt(value))
+    limit?: number = 500;
+
+    @IsNumber()
+    @IsOptional()
+    @Transform(({ value }) => parseInt(value))
+    offset?: number = 0;
 }

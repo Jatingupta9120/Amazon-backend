@@ -18,7 +18,7 @@ export class User {
     email: string;
 
     @Column({
-        type: DataType.NUMBER,
+        type: DataType.INTEGER,
         allowNull: false,
     })
     age: number;

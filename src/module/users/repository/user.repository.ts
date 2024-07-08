@@ -6,28 +6,28 @@ import { Transaction } from 'sequelize';
 
 @Injectable()
 export class UserRepository {
-    // async getAllUsers(options: UserParamsDTO): Promise<User[]> {
-    //     const users = await User.findAll({
-    //         where: options.id ? { id: options.id } : {},
-    //         attributes: { exclude: ['createdAt', 'updatedAt'] },
-    //         limit: options.limit || 10,
-    //         offset: options.offset || 0,
-    //     });
-    //     if (!users) {
-    //         throw new HttpException('User not found', 404);
-    //     }
-    //     return users;
-    // }
+    async getAllUsers(options: UserParamsDTO): Promise<User[]> {
+        const users = await User.findAll({
+            where: options.id ? { id: options.id } : {},
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
+            limit: options.limit || 10,
+            offset: options.offset || 0,
+        });
+        if (!users) {
+            throw new HttpException('User not found', 404);
+        }
+        return users;
+    }
 
-    // async getUserById(id: string) {
-    //     const user = await User.findOne( {
-    //         attributes: { exclude: ['createdAt', 'updatedAt'] },
-    //     });
-    //     if (!user) {
-    //         throw new HttpException('User not found', 404);
-    //     }
-    //     return {user};
-    // }
+    async getUserById(id: number) {
+        const user = await User.findOne( {
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
+        });
+        if (!user) {
+            throw new HttpException('User not found', 404);
+        }
+        return {user};
+    }
 
     // async getUserByEmail(options: CreateUserDTO): Promise<User> {
     //     const user = await User.findOne({
@@ -40,14 +40,14 @@ export class UserRepository {
     //     return user;
     // }
 
-    async createUser(params: CreateUserDTO,dbTransaction: Transaction): Promise<User> {
+    async createUser(params: CreateUserDTO): Promise<User> {
             const hashedPassword = await bcrypt.hash(params.password, 10);
-            const newUser = await User.create({...params,password: hashedPassword},{ transaction: dbTransaction });
+            const newUser = await User.create({...params,password: hashedPassword});
             return newUser;
     }
 
-    async deleteUser(id: number,dbTransaction: Transaction) {
-            const user = await User.destroy({ where: { id:id }, transaction: dbTransaction });
+    async deleteUser(id: string) {
+            const user = await User.destroy({ where: { id:id }});
             return `user sucessfully deleted ${user}`;
     }
 }

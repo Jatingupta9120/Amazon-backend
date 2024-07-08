@@ -23,46 +23,41 @@ export class OrderRepository {
     //         return order;
     // }
 
-    async createOrderWithProduct( createOrderDto:  Partial<Order>,
-        orderproduct: Partial<OrderProduct[]>,dbTransaction:Transaction){
-            try {
-                const order = await Order.create(createOrderDto,{dbtransaction:Transaction,include:[OrderProduct]})
-                for (const data of orderproduct) {
-                    const product = await this.productService.getAllProductsById(Number(data.productId));
-                    if(!product) {
-                      throw new HttpException(`Product with id ${data.id} not found`,HttpStatus.NOT_FOUND);
-                    }
-
-                    else {
-                        await OrderProduct.create({ ...createOrderDto, id: createOrderDto.id }, { dbtransaction:Transaction });
-
-                    }
-                  }
-                await dbTransaction.commit();
-                return order;
-            } catch (error) {
-                await dbTransaction.rollback();
-                throw new HttpException(error.message,HttpStatus.BAD_REQUEST);
+    async createOrderWithProduct( orderdata:  Partial<Order>,orderproductdata: Partial<OrderProduct[]>,dbTransaction:Transaction){
+        try {
+            const order = await Order.create(orderdata, {
+               dbtransaction:Transaction,
+               include: [OrderProduct] 
+            });
+      
+            for (const itemData of orderproductdata) {
+              const product = await this.productService.getAllProductsById(itemData.productId)
+              if(!product) {
+                throw new HttpException(`Product with id ${itemData.productId} not found`, 404);
+              }else {
+              await OrderProduct.create({ ...itemData, orderId: order.id }, { 
+                transaction: dbTransaction
+              } );
+              }
             }
+      
+            await dbTransaction.commit();
+            return order;
+          } catch (error) {
+            await dbTransaction.rollback();
+            console.log(error.status)
+            return error;
+            throw new HttpException(error.response, error.status)
+          }
 
     }
 
 
-    async getAllOrdersByUserId(options:PaginatedOrdersResultDto) {
-        return await OrderProduct.findAndCountAll({
-            where:{id:options.userid},
-            include: [
-                {
-                    model: User,
-                    as: 'users',
-                    attributes: { exclude: ['createdAt'] },
-                },
-                {
-                    model: Product,
-                    as: 'products',
-                    attributes: { exclude: ['createdAt'] },
-                },
-            ],
+    async getAllOrdersByUserId(options:FilteringDto) {
+        return await Order.findAll({
+            where: {id:options.userid},
+            ...options,
+            include: [OrderProduct],
             
         });
     }

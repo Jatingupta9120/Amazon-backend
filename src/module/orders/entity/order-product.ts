@@ -1,47 +1,39 @@
-import { Column, DataType, ForeignKey } from "sequelize-typescript";
+import { AutoIncrement, Column, DataType, ForeignKey, Model } from "sequelize-typescript";
 import { CustomTable } from "src/utils/custom-class-validator/validator/customTable";
 import { Order } from "./order.entity";
 import { Product } from "src/module/products/entity/product.entity";
-import { Model } from "sequelize";
 
 @CustomTable('orderProduct')
 export class OrderProduct  extends Model<OrderProduct>{
 
     @Column({
-        type: DataType.UUID,
+        type: DataType.INTEGER,
         primaryKey:true,
-        allowNull:false,
-        defaultValue: DataType.UUIDV4,
+        autoIncrement:true,
       })
-    id:string;
+    id:number;
 
     @ForeignKey(()=>Order)
     @Column({
-    type: DataType.UUID,
-    allowNull: false,
-    defaultValue: DataType.UUIDV4,
+    type: DataType.INTEGER,
     })
-    orderId: string;
+    orderId: number;
 
     @ForeignKey(()=>Product)
     @Column({
-    type: DataType.UUID,
-    allowNull: false,
-    defaultValue: DataType.UUIDV4,
+    type: DataType.INTEGER,
     })
     productId: number;
 
     @Column({
-      type: DataType.NUMBER,
-      allowNull: false,
+      type: DataType.INTEGER,
       })
     Quantity:number;
 
     @Column({
-      type: DataType.NUMBER,
-      allowNull: false,
+      type: DataType.INTEGER,
       })
-    PriceAtPurchase:number;
+    Price:number;
     
     
 }

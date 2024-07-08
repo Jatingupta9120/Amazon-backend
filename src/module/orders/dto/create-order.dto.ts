@@ -1,9 +1,10 @@
-import { IsDateString, IsEnum, isInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsDateString, IsEnum, isInt, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { Order } from "../entity/order.entity";
-import { Transform } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { Product } from "src/module/products/entity/product.entity";
 import { OrderProduct } from "../entity/order-product";
 import { IsInt } from "sequelize-typescript";
+import { CreateOrderItemDto } from "./create-order-item.dto";
 
 
 export enum OrderStatus {
@@ -18,40 +19,19 @@ export class CreateOrderDto {
     @IsNotEmpty()
     userId: number;
 
-    @IsString()
+    @IsArray()
     @IsOptional()
-    orderCode?: string;
-
-    @IsDateString()
-    @IsOptional()
-    orderDate?: Date;
-
-    @IsString()
-    @IsOptional()
-    orderType?: string;
-
-    @IsString()
-    @IsOptional()
-    products?: Product[];
-
-    @IsString()
-    @IsOptional()
-    orderStatus?: string;
+    @Type(() => CreateOrderItemDto)
+    @ValidateNested({ each: true })
+    orderItems?: CreateOrderItemDto[];
 
     @IsNumber()
     @IsOptional()
-    quantity?: number;
-
-    @IsNumber()
-    @IsOptional()
-    totalPrice?: number;
-
-    @IsEnum(OrderStatus)
-    status: OrderStatus;
+    price?: number;
 
     @IsOptional()
     @IsString()
-    address:string;
+    address?:string;
   }
 
 export class PaginatedOrdersResultDto {
@@ -60,8 +40,15 @@ export class PaginatedOrdersResultDto {
   @IsOptional()
   userid?: number;
 
+
+  @IsArray()
   @IsOptional()
-  orders?: Order[];  
+  @Type(() => CreateOrderItemDto)
+  orderItems?: CreateOrderItemDto[];
+
+  
+  @IsOptional()
+  orders?: OrderProduct[];  
 
   @IsNumber()
   @IsOptional()

@@ -1,60 +1,43 @@
-import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, HasMany,  Model, Table } from 'sequelize-typescript';
 import { Product } from 'src/module/products/entity/product.entity';
 import { User } from 'src/module/users/entity/user.entity';
 import { CustomTable } from 'src/utils/custom-class-validator/validator/customTable';
 import { OrderProduct } from './order-product';
+import { CreateOrderItemDto } from '../dto/create-order-item.dto';
+import { Type } from 'class-transformer';
+import {  IsOptional,IsArray } from 'class-validator';
 
 @CustomTable('orders')
 export class Order extends Model<Order> {
 
     @ForeignKey(() => User)
     @Column({
-        type: DataType.UUID,
+        type: DataType.INTEGER,
         allowNull: false,
-        defaultValue: DataType.UUIDV4,
+        defaultValue: DataType.INTEGER,
     })
-    userid: string;
+    userid: number;
 
     @Column({
         primaryKey: true,
-        type: DataType.UUID,
+        type: DataType.INTEGER,
         allowNull:false,
-        defaultValue: DataType.UUIDV4,
+        autoIncrement:true,
     })
-    id: string;
+    id: number;
 
     @Column({
         allowNull: false,
-        unique:true,
-        type: DataType.STRING,
+        type: DataType.INTEGER,
     })
-    OrderCode: string;
-
+    Price: number;
+      
     @Column({
-        type: DataType.ENUM,
-        values: ['PENDING', 'IN_PROGRESS', 'DONE'],
-        allowNull: false,
-    })
-    OrderStatus: string;
-
-    @Column({
+        type:DataType.STRING,
         allowNull: true,
-        type: DataType.INTEGER,
     })
-    OrderQuantity: number;
+    address: string;
 
-    @Column({
-        allowNull: false,
-        type: DataType.INTEGER,
-    })
-    TotalPrice: number;
-                                
-    @Column({
-        type: DataType.DATE,
-        allowNull: false,
-    })
-    created_at: string;
-
-    @HasMany(()=>Product)
-    products: Product[];
+    @HasMany(()=>OrderProduct)
+    products: OrderProduct[];
 }

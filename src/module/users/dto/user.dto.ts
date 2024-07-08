@@ -36,8 +36,8 @@ export class CreateUserDTO {
 
 export class UserParamsDTO {
     @IsOptional()
-    @IsString()
-    id: string;
+    @IsNumber()
+    id?: number;
 
     @IsOptional()
     @IsString()
